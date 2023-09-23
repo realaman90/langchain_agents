@@ -3,12 +3,16 @@ from langchain.chat_models import ChatOpenAI
 from langchain import LLMChain
 import os
 from dotenv import load_dotenv
+from typing import Tuple
 
 from agents.linkedin_lookup import lookup as linkedin_lookup_agent
 from third_parties.linkedin import scrape_linkedin
 
 from third_parties.twitter import scrape_user_tweets
-from outputparser import person_intel_parser
+from outputparser import (
+    PersonalIntel,
+    person_intel_parser,
+)
 
 
 load_dotenv()
@@ -23,7 +27,8 @@ information = """
     hobbies: playing guitar, reading, writing
     """
 
-def ice_break(name:str)->str:
+
+def ice_break(name: str) -> Tuple[PersonalIntel, str]:
     if __name__ == "__main__":
         # print helloworld
         print("Hello World!")
@@ -43,7 +48,9 @@ def ice_break(name:str)->str:
         summary_prompt_template = PromptTemplate(
             template=summary_template,
             input_variables=["information"],
-            partial_variables={"format_instructions": person_intel_parser.get_format_instructions()},
+            partial_variables={
+                "format_instructions": person_intel_parser.get_format_instructions()
+            },
         )
 
         llm = ChatOpenAI(
@@ -54,15 +61,13 @@ def ice_break(name:str)->str:
 
         # linkedin Data
         linkedinData = scrape_linkedin(url=linkedin_profile)
-        result = chain.run(information=linkedinData)
+        result = chain.run(information=linkedinData), linkedinData.get(
+            "profile_pic_url"
+        )
         print(result)
 
         return result
-    
+
 
 if __name__ == "__main__":
-    print("Hello World!")
-    result = ice_break(name="Harrison Chase")
-    print(result)
-
-
+    pass
